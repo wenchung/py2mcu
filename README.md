@@ -113,38 +113,79 @@ counter: uint32_t = 1000   # ✅ unsigned 32-bit
 temperature: float = 25.5  # ✅ 32-bit float
 ```
 
-### Return Type Annotations
+## print() to printf() Conversion
 
-Functions without return values can omit the `-> None` annotation. py2mcu automatically converts unannotated functions to `void` in C.
+py2mcu automatically converts Python's `print()` statements to C's `printf()` with intelligent formatting.
 
-**Simplified syntax (recommended):**
+### Conversion Rules
+
+#### 1. Empty print()
 ```python
-def setup():              # No annotation needed
-    pin_mode(13, OUTPUT)
-
-def loop():               # Automatically converts to void
-    digital_write(13, HIGH)
-    delay(1000)
-
-def calculate() -> int:   # Annotate when returning a value
-    return 42
+print()
+```
+↓ Converts to:
+```c
+printf("\n");
 ```
 
-**Verbose syntax (still valid):**
+#### 2. Single argument
 ```python
-def setup() -> None:      # Explicit but redundant
-    pin_mode(13, OUTPUT)
+print(42)
+print(x)
+```
+↓ Converts to:
+```c
+printf("%d\n", 42);
+printf("%d\n", x);
 ```
 
-**Rules:**
-| Python Annotation | C Return Type | Description |
-|-------------------|---------------|-------------|
-| (no annotation) | `void` | Automatically inferred ✅ |
-| `-> None` | `void` | Explicit void annotation |
-| `-> int` | `int32_t` | Returns integer |
-| `-> float` | `float` | Returns float |
-| `-> bool` | `bool` | Returns boolean |
+#### 3. String with multiple arguments
+```python
+print("Value:", x)
+print("x =", x, "y =", y)
+```
+↓ Converts to:
+```c
+printf("Value: %d\n", x);
+printf("x = %d y = %d\n", x, y);
+```
 
+### How It Works
+
+The conversion logic (from `codegen.py` lines 317-332):
+
+1. **String prefix + arguments**: Combines the first string with `%d` placeholders for remaining arguments
+2. **Auto-append newline**: Adds `\n` to every printf call
+3. **Format specifier**: Uses `%d` (integer) for all non-string arguments by default
+
+### Current Limitations
+
+⚠️ **Fixed format specifier**: All numeric arguments use `%d` (integer format)
+
+For advanced formatting (floats, hex, etc.), use inline C:
+```python
+__C_CODE__ = """
+printf("Float: %.2f, Hex: 0x%X\\n", voltage, register_val);
+"""
+```
+
+### Best Practices
+
+**✅ Recommended usage:**
+```python
+print("Debug: value =", x)      # Simple labeled output
+print(counter)                   # Single variable
+print("ADC:", adc_value)        # Sensor readings
+```
+
+**⚠️ Use inline C for:**
+```python
+# Complex formatting needs
+__C_CODE__ = """
+printf("Temperature: %.1f°C\\n", temp);
+printf("Status: 0x%04X\\n", status_reg);
+"""
+```
 
 ## Target Platform Support
 
