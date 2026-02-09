@@ -22,6 +22,11 @@ class CCodeGenerator(ast.NodeVisitor):
         # Add includes
         self._add_includes()
 
+        # Add #define constants (from @#define annotations)
+        if hasattr(tree, 'py2mcu_defines') and tree.py2mcu_defines:
+            self._add_defines(tree.py2mcu_defines)
+            self.emit("")
+
         # Add GC runtime
         self.emit('#include "gc_runtime.h"')
         self.emit("")
@@ -36,6 +41,60 @@ class CCodeGenerator(ast.NodeVisitor):
         for include in sorted(self.includes):
             self.emit(f"#include {include}")
         self.emit("")
+
+    def _add_defines(self, defines: List[Dict]):
+        """Generate #define directives from @#define annotations
+        
+        Args:
+            defines: List of dicts with 'name', 'value', 'type' (optional)
+        """
+        if not defines:
+            return
+        
+        self.emit("// Constants from @#define annotations")
+        
+        for d in defines:
+            name = d['name']
+            value = d['value']
+            c_type = d.get('type')
+            
+            # Convert Python values to C format
+            c_value = self._python_value_to_c(value)
+            
+            if c_type:
+                # Typed constant: #define LED_PIN ((uint8_t)13)
+                self.emit(f"#define {name} (({c_type}){c_value})")
+            else:
+                # Simple define: #define MAX_SIZE 10
+                self.emit(f"#define {name} {c_value}")
+    
+    def _python_value_to_c(self, value_str: str) -> str:
+        """Convert Python literal to C format
+        
+        Examples:
+            True -> 1
+            False -> 0
+            "text" -> "text"
+            1000 * 60 -> (1000 * 60)
+        """
+        value_str = value_str.strip()
+        
+        # Boolean conversion
+        if value_str == 'True':
+            return '1'
+        elif value_str == 'False':
+            return '0'
+        
+        # String literals - keep as is
+        if value_str.startswith('"') or value_str.startswith("'"):
+            return value_str.replace("'", '"')
+        
+        # Expression with operators - wrap in parentheses
+        if any(op in value_str for op in ['*', '+', '-', '/', '<<', '>>', '&', '|', '^']):
+            return f"({value_str})"
+        
+        # Simple numeric or identifier - use as is
+        return value_str
 
     def visit_Module(self, node: ast.Module):
         """Visit module node"""
