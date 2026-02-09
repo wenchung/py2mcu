@@ -113,7 +113,7 @@ See the `examples/` directory for complete demos:
 ```bash
 # Compile and test on PC (use --output or -o)
 python -m py2mcu.cli compile examples/demo1_led_blink.py --target pc --output build/
-gcc build/demo1_led_blink.c runtime/gc_runtime.c -o demo1
+gcc -Iruntime build/demo1_led_blink.c runtime/gc_runtime.c -o demo1
 ./demo1
 
 # Generate C code for STM32F4 (shorthand -o also works)
@@ -124,6 +124,11 @@ python -m py2mcu.cli compile examples/demo3_inline_c.py --target pc -o build/
 python -m py2mcu.cli compile examples/demo4_memory.py --target pc -o build/
 python -m py2mcu.cli compile examples/demo5_docstring_c.py --target pc -o build/
 python -m py2mcu.cli compile examples/demo6_defines.py --target pc -o build/
+
+# Compile generated C code (requires -Iruntime for header files)
+gcc -Iruntime build/demo1_led_blink.c runtime/gc_runtime.c -o demo1
+gcc -Iruntime build/demo3_inline_c.c runtime/gc_runtime.c -o demo3
+gcc -Iruntime build/demo4_memory.c runtime/gc_runtime.c -o demo4
 
 # Check generated code
 cat build/demo2_adc_average.c
