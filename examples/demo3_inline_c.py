@@ -1,83 +1,99 @@
 #!/usr/bin/env python3
 """
-Demo 3: Inline C - Performance Optimization
-Demonstrates: inline C code, direct hardware access
+Demo 3: Inline C for Performance-Critical Code
+Demonstrates: inline C integration, direct hardware access
 """
 
-from py2mcu.decorators import inline_c
+from py2mcu import inline_c
 
-# Hardware configuration (STM32F4 example)
-GPIOA_BASE: int = 0x40020000
-GPIO_ODR_OFFSET: int = 0x14
+# For STM32F4, direct register access
+INLINE_GPIO_CODE = """
+// Fast GPIO operations using direct register access
+#define GPIOC_BASE 0x40020800
+#define GPIO_BSRR_OFFSET 0x18
+#define GPIO_IDR_OFFSET 0x10
 
-@inline_c("""
-// Fast GPIO toggle using direct register access
-void gpio_toggle_fast(uint32_t gpio_base, uint8_t pin) {
-    volatile uint32_t* odr = (uint32_t*)(gpio_base + 0x14);
-    *odr ^= (1 << pin);
-}
-""")
-def gpio_toggle(gpio_base: int, pin: int) -> None:
-    """Toggle GPIO pin using inline C"""
-    # This Python code is replaced by inline C at compile time
-    pass
-
-@inline_c("""
-// Fast delay using assembly NOP instructions
-void delay_cycles(uint32_t cycles) {
-    while(cycles--) {
-        __asm__ volatile("nop");
+static inline void fast_gpio_set(int pin, int value) {
+    volatile uint32_t* bsrr = (uint32_t*)(GPIOC_BASE + GPIO_BSRR_OFFSET);
+    if (value) {
+        *bsrr = (1 << pin);           // Set bit
+    } else {
+        *bsrr = (1 << (pin + 16));    // Reset bit
     }
 }
-""")
-def delay_cycles(cycles: int) -> None:
-    """Precise delay in CPU cycles"""
-    pass
 
-def delay_ms(ms: int) -> None:
-    """Standard delay"""
-    pass
+static inline uint32_t fast_gpio_read(int pin) {
+    volatile uint32_t* idr = (uint32_t*)(GPIOC_BASE + GPIO_IDR_OFFSET);
+    return (*idr >> pin) & 1;
+}
+"""
 
-def benchmark_gpio() -> None:
-    """Benchmark GPIO performance"""
-    pin: int = 5
-    iterations: int = 10000
+@inline_c(INLINE_GPIO_CODE)
+def gpio_set_fast(pin: int, value: bool) -> None:
+    """Fast GPIO write using inline C
+    
+    Alternative with __C_CODE__ marker:
+    __C_CODE__
+    volatile uint32_t* bsrr = (uint32_t*)(0x40020800 + 0x18);
+    if (value) {
+        *bsrr = (1 << pin);
+    } else {
+        *bsrr = (1 << (pin + 16));
+    }
+    """
+    fast_gpio_set(pin, 1 if value else 0)
+
+@inline_c(INLINE_GPIO_CODE)
+def gpio_read_fast(pin: int) -> int:
+    """Fast GPIO read using inline C
+    
+    Alternative with __C_CODE__ marker:
+    __C_CODE__
+    volatile uint32_t* idr = (uint32_t*)(0x40020800 + 0x10);
+    return (*idr >> pin) & 1;
+    """
+    return fast_gpio_read(pin)
+
+def critical_timing_loop() -> None:
+    """Time-critical loop using inline C for performance"""
+    count: int = 0
+
+    while count < 1000000:
+        # These calls compile to direct register access
+        gpio_set_fast(13, True)
+        gpio_set_fast(13, False)
+        count = count + 1
+
+def button_debounce(pin: int) -> bool:
+    """Debounce button using fast GPIO reads"""
+    # Read button state 5 times
+    readings: int = 0
     i: int = 0
 
-    print("Starting GPIO benchmark...")
-
-    # Fast toggle using inline C
-    while i < iterations:
-        gpio_toggle(GPIOA_BASE, pin)
-        delay_cycles(100)
+    while i < 5:
+        state: int = gpio_read_fast(pin)
+        readings = readings + state
         i = i + 1
 
-    print("Benchmark complete")
-
-def pulse_train(pin: int, pulse_count: int, period_cycles: int) -> None:
-    """
-    Generate precise pulse train
-    Uses inline C for timing-critical code
-    """
-    count: int = 0
-    while count < pulse_count:
-        gpio_toggle(GPIOA_BASE, pin)  # High
-        delay_cycles(period_cycles // 2)
-        gpio_toggle(GPIOA_BASE, pin)  # Low
-        delay_cycles(period_cycles // 2)
-        count = count + 1
+    # Button is pressed if majority reads are high
+    return readings >= 3
 
 def main() -> None:
     """Main program"""
-    print("Inline C Performance Demo")
+    print("Inline C Demo")
+    print("Running critical timing loop...")
 
-    # Run benchmark
-    benchmark_gpio()
+    critical_timing_loop()
 
-    # Generate 1000 pulses at ~1MHz (assuming 168MHz CPU)
-    pulse_train(5, 1000, 168)
+    print("Testing button debounce...")
+    button_pin: int = 0
 
-    print("Demo complete")
+    while True:
+        if button_debounce(button_pin):
+            print("Button pressed!")
+            gpio_set_fast(13, True)
+        else:
+            gpio_set_fast(13, False)
 
 if __name__ == "__main__":
     main()
