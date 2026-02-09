@@ -9,14 +9,32 @@ LED_PIN: int = 13
 BLINK_DELAY: int = 500  # milliseconds
 
 def delay_ms(ms: int) -> None:
-    """Delay for specified milliseconds"""
-    # This will be mapped to platform-specific delay
-    pass
+    """Delay for specified milliseconds
+    
+    __C_CODE__
+    // STM32F4 precise delay using SysTick
+    uint32_t start = HAL_GetTick();
+    while ((HAL_GetTick() - start) < ms) {
+        __NOP();  // No operation, just wait
+    }
+    """
+    # PC simulation: Python sleep
+    import time
+    time.sleep(ms / 1000.0)
 
 def gpio_write(pin: int, value: bool) -> None:
-    """Write digital value to GPIO pin"""
-    # This will be mapped to platform-specific GPIO write
-    pass
+    """Write digital value to GPIO pin
+    
+    __C_CODE__
+    // STM32F4 GPIO write (assumes GPIOA)
+    if (value) {
+        GPIOA->BSRR = (1 << pin);  // Set pin high
+    } else {
+        GPIOA->BSRR = (1 << (pin + 16));  // Set pin low
+    }
+    """
+    # PC simulation: print GPIO state
+    print(f"GPIO Pin {pin}: {'HIGH' if value else 'LOW'}")
 
 def setup() -> None:
     """Initialize hardware"""
