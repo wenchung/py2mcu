@@ -105,17 +105,25 @@ See the `examples/` directory for complete demos:
 - `demo2_adc_average.py` - Array processing and calculations
 - `demo3_inline_c.py` - Inline C for performance-critical code
 - `demo4_memory.py` - Memory management showcase
+- `demo5_docstring_c.py` - Using docstrings for inline C code
+- `demo6_defines.py` - Module-level constants with #define
 
 ### Running Examples (Without Installation)
 
 ```bash
-# Compile and test on PC
-python -m py2mcu.cli compile examples/demo1_led_blink.py --target pc -o build/
+# Compile and test on PC (use --output or -o)
+python -m py2mcu.cli compile examples/demo1_led_blink.py --target pc --output build/
 gcc build/demo1_led_blink.c runtime/gc_runtime.c -o demo1
 ./demo1
 
-# Generate C code for STM32F4
+# Generate C code for STM32F4 (shorthand -o also works)
 python -m py2mcu.cli compile examples/demo2_adc_average.py --target stm32f4 -o build/
+
+# Compile all demos
+python -m py2mcu.cli compile examples/demo3_inline_c.py --target pc -o build/
+python -m py2mcu.cli compile examples/demo4_memory.py --target pc -o build/
+python -m py2mcu.cli compile examples/demo5_docstring_c.py --target pc -o build/
+python -m py2mcu.cli compile examples/demo6_defines.py --target pc -o build/
 
 # Check generated code
 cat build/demo2_adc_average.c
@@ -124,14 +132,16 @@ cat build/demo2_adc_average.c
 ## Documentation
 
 - [User Guide](docs/guide.md)
-- [API Reference](docs/api.md)
+- [Language Reference](docs/language.md)
 - [Memory Management](docs/memory.md)
-- [Supported Python Features](docs/features.md)
+- [Index](docs/INDEX.md)
+
+## Requirements
+
+- Python 3.10+
+- GCC or any C compiler for platform-targets
+- MCU development tools (STM32Cube, ESP-IDF, etc.)
 
 ## License
 
-MIT License - See LICENSE file for details
-
-## Contributing
-
-Contributions welcome! Please see CONTRIBUTING.md for guidelines.
+MIT License - see LICENSE file for details.
