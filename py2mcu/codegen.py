@@ -23,7 +23,7 @@ class CCodeGenerator(ast.NodeVisitor):
         self._add_includes()
 
         # Add GC runtime
-        self.emit("#include \"gc_runtime.h\"")
+        self.emit('#include "gc_runtime.h"')
         self.emit("")
 
         # Visit all nodes
@@ -60,9 +60,18 @@ class CCodeGenerator(ast.NodeVisitor):
         self.emit(f"{return_type} {node.name}({params_str}) {{")
         self.indent_level += 1
 
-        # Function body
-        for stmt in node.body:
-            self.visit(stmt)
+        # Check if function has docstring with C code
+        c_code = self._extract_c_code_from_docstring(node)
+        
+        if c_code:
+            # Use the C code from docstring
+            for line in c_code.split('\n'):
+                if line.strip():
+                    self.emit(line.strip())
+        else:
+            # Generate from Python body
+            for stmt in node.body:
+                self.visit(stmt)
 
         self.indent_level -= 1
         self.emit("}")
@@ -209,6 +218,32 @@ class CCodeGenerator(ast.NodeVisitor):
                 return "void"
 
         return "void"
+
+    def _extract_c_code_from_docstring(self, node: ast.FunctionDef) -> str:
+        """Extract C code from function docstring if marked with __C_CODE__"""
+        if not node.body:
+            return ""
+        
+        # Check if first statement is a docstring
+        first_stmt = node.body[0]
+        if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Constant):
+            docstring = first_stmt.value.value
+            if isinstance(docstring, str) and "__C_CODE__" in docstring:
+                # Extract C code after the marker
+                lines = docstring.split('\n')
+                c_lines = []
+                found_marker = False
+                
+                for line in lines:
+                    if "__C_CODE__" in line:
+                        found_marker = True
+                        continue
+                    if found_marker and line.strip():
+                        c_lines.append(line)
+                
+                return '\n'.join(c_lines)
+        
+        return ""
 
     def emit(self, line: str):
         """Emit a line of C code with proper indentation"""
