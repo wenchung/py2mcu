@@ -54,6 +54,37 @@ gcc build/demo4_memory.c runtime/gc_runtime.c -o build/demo4_memory
 ./build/demo4_memory
 ```
 
+### demo5_docstring_c.py - Docstring Embedded C Code
+Demonstrates docstring-embedded C code:
+- Use `__C_CODE__` marker in function docstrings
+- Python remains executable for PC testing
+- C code compiled to MCU for performance
+- Direct register access (GPIO, ADC, timers)
+- Critical timing sections with inline assembly
+
+**Key Feature:**
+Functions with `__C_CODE__` in their docstring will have that C code compiled to the MCU, while the Python fallback code runs during PC testing.
+
+**Example:**
+```python
+def gpio_toggle(pin: int) -> None:
+    """__C_CODE__
+    GPIOA->ODR ^= (1 << pin);
+    """
+    # Python fallback for PC testing
+    print(f"Toggle pin {pin}")
+```
+
+**Compile:**
+```bash
+py2mcu compile examples/demo5_docstring_c.py --target stm32f4 -o build/
+```
+
+**Test on PC:**
+```bash
+python examples/demo5_docstring_c.py
+```
+
 ## Generated C Code
 
 After compilation, check the `build/` directory for generated C code.
