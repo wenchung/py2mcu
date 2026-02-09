@@ -85,6 +85,52 @@ py2mcu compile examples/demo5_docstring_c.py --target stm32f4 -o build/
 python examples/demo5_docstring_c.py
 ```
 
+### demo6_defines.py - C Preprocessor Defines
+Demonstrates `@#define` comment annotations:
+- Generate C `#define` directives from Python constants
+- Hardware configuration constants with type hints
+- Buffer sizes and compile-time limits
+- Feature flags (boolean to 0/1)
+- String constants
+- Expression support (e.g., `1000 * 60`)
+
+**Key Feature:**
+Use `# @#define` comments to mark constants for C preprocessing. Supports optional type hints for type-safe constants.
+
+**Example:**
+```python
+LED_PIN = 13  # @#define uint8_t
+MAX_SAMPLES = 100  # @#define
+TIMEOUT_MS = 1000 * 60  # @#define
+DEBUG_ENABLED = True  # @#define
+DEVICE_NAME = "STM32F4"  # @#define
+```
+
+**Generated C:**
+```c
+#define LED_PIN ((uint8_t)13)
+#define MAX_SAMPLES 100
+#define TIMEOUT_MS (1000 * 60)
+#define DEBUG_ENABLED 1
+#define DEVICE_NAME "STM32F4"
+```
+
+**Benefits:**
+- Compile-time constants for optimization
+- Type-safe with optional type hints
+- Python code remains executable for testing
+- No runtime overhead for constant access
+
+**Compile:**
+```bash
+py2mcu compile examples/demo6_defines.py --target stm32f4 -o build/
+```
+
+**Test on PC:**
+```bash
+python examples/demo6_defines.py
+```
+
 ## Generated C Code
 
 After compilation, check the `build/` directory for generated C code.
