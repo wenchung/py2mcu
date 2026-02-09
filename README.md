@@ -1,137 +1,137 @@
-# py2mcu - Python to Microcontroller Compiler
+# py2mcu - Python to MCU C Compiler
 
-**py2mcu** is a specialized Python-to-C compiler designed for resource-constrained microcontrollers (MCUs). It translates a subset of Python into efficient C code with automatic memory management, making embedded development more accessible without sacrificing performance.
-
----
+Write Python, test on PC, deploy to microcontrollers with automatic memory management.
 
 ## Features
 
-### 🚀 Core Capabilities
-- **Python-to-C Translation**: Compiles Python functions decorated with `@mcu_function` into optimized C code
-- **Automatic Memory Management**: Built-in garbage collector using Arena allocation + Reference Counting
-- **Type Inference**: Automatically determines variable types from usage patterns
-- **Inline C Support**: Use `@inline_c` for performance-critical sections (GPIO, DMA, etc.)
-
-### 🎯 Why py2mcu?
-- Write embedded code in Python syntax
-- Automatic memory safety (no manual malloc/free)
-- Seamless integration with existing C libraries
-- Optimized for MCU constraints (RAM, Flash, CPU)
-
----
-
-## Installation
-
-```bash
-pip install py2mcu
-```
-
----
+- **Python to C Translation**: Converts typed Python code to efficient C
+- **Automatic Memory Management**: Arena allocator + reference counting
+- **Inline C Support**: Write performance-critical code directly in C
+- **PC Testing**: Test your code on PC before deploying to MCU
+- **Multiple MCU Support**: STM32, ESP32, RP2040, and more
 
 ## Quick Start
 
-### Example: LED Blink (Demo 1)
+### Option 1: Direct Usage (No Installation Required)
+
+```bash
+# Clone the repository
+git clone https://github.com/wenchung/py2mcu.git
+cd py2mcu
+
+# Run compiler directly
+python -m py2mcu.cli compile examples/demo1_led_blink.py --target pc
+
+# Or use the direct script
+python py2mcu/cli.py compile examples/demo1_led_blink.py --target pc
+```
+
+### Option 2: Install as Package
+
+```bash
+pip install -e .
+py2mcu compile examples/demo1_led_blink.py --target pc
+```
+
+### Hello World
 
 ```python
-from py2mcu import mcu_function
+# hello.py
+def main() -> None:
+    print("Hello from py2mcu!")
 
-@mcu_function
-def blink_led(pin: int, times: int) -> None:
-    """Blink LED using Python control flow"""
-    for i in range(times):
-        gpio_set(pin, 1)
-        delay_ms(500)
-        gpio_set(pin, 0)
-        delay_ms(500)
+if __name__ == "__main__":
+    main()
 ```
 
-**Compile to C:**
+Compile to C:
 ```bash
-py2mcu compile examples/demo1_led_blink.py -o build/demo1.c
-```
+# Without installation
+python -m py2mcu.cli compile hello.py --target pc
 
----
+# With installation
+py2mcu compile hello.py --target pc
+```
 
 ## Architecture
 
-### Compiler Pipeline
 ```
-Python Source → AST Parser → Type Checker → Code Generator → C Output
-                                                ↓
-                                        GC Runtime (Arena + RefCount)
+Python Source → AST Parser → Type Checker → C Code Generator → MCU Compiler → Binary
 ```
 
-### Memory Management
-- **Arena Allocator**: Fast bump-pointer allocation for short-lived objects
-- **Reference Counting**: Automatic cleanup when objects are no longer used
-- **Manual Control**: `gc_collect()` for explicit cleanup in tight loops
+## Memory Management
 
----
+py2mcu uses a hybrid memory management strategy:
 
-## Demo Examples
+- **Stack allocation** for fixed-size local variables
+- **Arena allocator** for temporary allocations (fast, automatic cleanup)
+- **Reference counting** for heap objects that escape function scope
 
-| Demo | Description | Key Features |
-|------|-------------|-------------|
-| **demo1_led_blink.py** | LED blinking with delays | Basic control flow, loops |
-| **demo2_adc_average.py** | ADC sampling with moving average | Arrays, arithmetic operations |
-| **demo3_inline_c.py** | High-speed GPIO toggling | Inline C for performance |
-| **demo4_memory.py** | Memory management showcase | Arena allocation, ref counting |
+### Example
 
-Run examples:
+```python
+def process_sensor():
+    # Stack allocation (compile-time known size)
+    readings: List[int, 10] = [0] * 10
+
+    # Arena allocation (automatic cleanup)
+    with arena():
+        temp = process_data(readings)
+
+    # Reference counting (escapes function)
+    result = create_report(temp)
+    return result  # caller owns the reference
+```
+
+## Inline C Support
+
+```python
+from py2mcu import inline_c
+
+@inline_c("""
+uint32_t fast_gpio_read(int pin) {
+    return GPIOC->IDR & (1 << pin);
+}
+""")
+def read_gpio(pin: int) -> int:
+    return fast_gpio_read(pin)
+```
+
+## Examples
+
+See the `examples/` directory for complete demos:
+
+- `demo1_led_blink.py` - Basic control flow and GPIO
+- `demo2_adc_average.py` - Array processing and calculations
+- `demo3_inline_c.py` - Inline C for performance-critical code
+- `demo4_memory.py` - Memory management showcase
+
+### Running Examples (Without Installation)
+
 ```bash
-py2mcu compile examples/demo1_led_blink.py
-py2mcu deploy build/demo1.c --port /dev/ttyUSB0
+# Compile and test on PC
+python -m py2mcu.cli compile examples/demo1_led_blink.py --target pc -o build/
+gcc build/demo1_led_blink.c runtime/gc_runtime.c -o demo1
+./demo1
+
+# Generate C code for STM32F4
+python -m py2mcu.cli compile examples/demo2_adc_average.py --target stm32f4 -o build/
+
+# Check generated code
+cat build/demo2_adc_average.c
 ```
 
----
+## Documentation
 
-## Command-Line Interface
-
-```bash
-# Compile Python to C
-py2mcu compile input.py -o output.c
-
-# Compile + Deploy to MCU
-py2mcu deploy output.c --port /dev/ttyUSB0 --board arduino_uno
-
-# Show generated C code
-py2mcu compile input.py --show
-```
-
----
-
-## Limitations
-
-⚠️ **Currently Unsupported:**
-- Object-oriented programming (classes)
-- Dynamic typing (variables must have consistent types)
-- Recursion (limited stack on MCUs)
-- String manipulation (minimal support)
-
----
-
-## Roadmap
-
-- [ ] STM32 HAL integration
-- [ ] ESP32 FreeRTOS support
-- [ ] Interrupt handler decorators
-- [ ] DMA buffer management
-- [ ] RTOS task scheduling
-
----
-
-## Contributing
-
-Contributions welcome! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
+- [User Guide](docs/guide.md)
+- [API Reference](docs/api.md)
+- [Memory Management](docs/memory.md)
+- [Supported Python Features](docs/features.md)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License - See LICENSE file for details
 
----
+## Contributing
 
-## Author
-
-Developed for embedded developers who want Python's simplicity with C's performance. 🚀
+Contributions welcome! Please see CONTRIBUTING.md for guidelines.
