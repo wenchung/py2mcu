@@ -1,5 +1,8 @@
 # py2mcu - Python to MCU C Compiler
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=github)](https://github.com/sponsors/wenchung)
+[![Support](https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee)](https://github.com/sponsors/wenchung)
+
 Write Python, test on PC, deploy to microcontrollers with automatic memory management.
 
 ## 📜 License
@@ -12,6 +15,16 @@ py2mcu is **dual-licensed**:
 See [LICENSE_DUAL.md](LICENSE_DUAL.md) for details.
 
 **Need a commercial license?** Contact: cwthome@gmail.com
+
+---
+
+## 💖 Support This Project
+
+If py2mcu helps your work, consider sponsoring its development:
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=for-the-badge&logo=github)](https://github.com/sponsors/wenchung)
+
+Your support helps maintain and improve py2mcu. Thank you! 🙏
 
 ---
 
@@ -89,7 +102,7 @@ def adc_example() -> None:
     
     __C_CODE__ = """
     #ifdef TARGET_PC
-        adc_value = rand() % 256;
+        adc_value = rand() & 256;
     #else
         adc_value = HAL_ADC_GetValue(&hadc1) & 0xFF;
     #endif
@@ -120,80 +133,29 @@ def adc_example() -> None:
 ### Example
 
 ```python
-byte: uint8_t = 255        # ✅ unsigned char (0-255)
-value: int = -100          # ✅ int32_t (signed)
-counter: uint32_t = 1000   # ✅ unsigned 32-bit
-temperature: float = 25.5  # ✅ 32-bit float
+def sum: uint8_t, uint8_t -> uint16_t:
+    return a + b
 ```
 
-## print() to printf() Conversion
-
-py2mcu automatically converts Python's `print()` statements to C's `printf()`. The compiler detects the variable type (`int`, `float`, `str`) and uses the appropriate format specifier:
-
-- `int` → `%d` or `%ld`
-- `float` → `%f`
-- `str` → `%s`
-
-### Example
-
-```python
-temp: float = 23.5
-print("Temperature:", temp)
-```
-
-Compiles to:
+Generated C code:
 ```c
-float temp = 23.5;
-printf("Temperature: %f\n", temp);
+uint16_t sum(uint8_t a, uint8_t b) {
+    return a + b;
+}
 ```
-
-### PCs vs MCUs
-
-- **PC target**: Uses standard `printf()` output
-- **MCU target** (STM32/ESP32): Directs output to UART peripherals
 
 ## Examples
 
-Check the `examples/` directory for complete demos:
+See [examples/](https://github.com/wenchung/py2mcu/tree/main/examples):
 
-- `demo1_led_blink.py` - Simple LED control
-- `demo2_adc_average.py` - ADC reading with moving average
-- `demo3_inline_c.py` - Inline C code for optimization
-
-## Project Structure
-
-```
-py2mcu/
-├── python_to_c/      # Core compiler
-    ├── ast_parser.py
-    ├── codegen.py
-    ├── type_checker.py
-    └── ...
-├── runtime/          # Runtime libraries (memory management)
-├── examples/         # Demo projects
-├── tests/           # Unit tests
-├── cli.py           # Command-line interface
-└── README.md
-```
-
-## Roadmap
-
-- [ X ] Basic type inference and C code generation
-- [ X ] Automatic memory management
-- [ X ] Inline C code support
-- [ X ] Target macros for cross-platform compilation
-- [ X ] Basic print() to printf() conversion
-- [   ] Array and pointer support
-- [   ] Struct and class support
-- [   ] Full Standard Library emulation
-- [   ] More MCU targets (RP2040, AVR, etc.)
+- [demo1_led_blink.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo1_led_blink.py) - Basic LED blinking with target-specific code
+- [demo2_adc_average.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo2_adc_average.py) - ADC reading and averaging
+- [demo3_inline_c.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo3_inline_c.py) - Inline C code integration
 
 ## Contributing
 
-Contributions welcome! Please open issues or submit PRs.
+We welcome contributions! Please open an issue or submit a pull request.
 
-## License
+## Contact
 
-py2mcu is dual-licensed under AGPLv3 (for open source) and a Commercial License (for proprietary use).
-
-See [LICENSE_DUAL.md](LICENSE_DUAL.md) for complete licensing information.
+For commercial licensing or support: cwthome@gmail.com
