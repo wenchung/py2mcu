@@ -18,7 +18,7 @@ See [LICENSE_DUAL.md](LICENSE_DUAL.md) for details.
 
 ---
 
-## 💖 Support This Project
+## 💚 Support This Project
 
 If py2mcu helps your work, consider sponsoring its development:
 
@@ -112,50 +112,120 @@ def adc_example() -> None:
 ### Type Reference Table
 
 | Python Annotation | C Type | Range |
-|------------------|--------|-------|
+|-------------------|--------|-------|
 | `uint8_t` | `uint8_t` | 0 ~ 255 |
 | `uint16_t` | `uint16_t` | 0 ~ 65535 |
 | `uint32_t` | `uint32_t` | 0 ~ 4294967295 |
 | `int8_t` | `int8_t` | -128 ~ 127 |
 | `int16_t` | `int16_t` | -32768 ~ 32767 |
-| `int32_t` or `int` | `int32_t` | -2147483648 ~ 2147483647 |
-| `float` | `float` | 32-bit floating point |
-| `bool` | `bool` | true/false |
+| `int32_t` | `int32_t` | -2147483648 ~ 2147483647 |
 
-### Key Points
+### Important Notes
 
-- **Use C type names directly** as Python type annotations
-- py2mcu preserves these type names in generated C code
-- `#include <stdint.h>` is automatically added
-- Default `int` maps to `int32_t` (signed 32-bit)
-- For unsigned 32-bit, explicitly use `uint32_t`
+- **Always use type annotations**: Python requires explicit types for all variables and function returns
+- **No type inference**: Unlike modern C++, py2mcu does not auto-deduce types from assignments
+- **Match MCU abilities**: Use `uint8_t`/`int8_t` for 8-bit MCUs, `int32_t` for 32-bit addressing
 
-### Example
+
+
+## Volatile Variables
+
+For hardware registers or variables modified by interrupts/DMA, use the `# @volatile` comment to mark variables as `volatile` in generated C code:
+
+### Example: Hardware Register Access
 
 ```python
-def sum: uint8_t, uint8_t -> uint16_t:
-    return a + b
+def read_sensor() -> None:
+    sensor_value: uint16_t = 0  # @volatile
+    
+    __C_CODE__ = """
+    #ifdef TARGET_PC
+        sensor_value = rand() % 1024;
+    #else
+        sensor_value = *((volatile uint16_t*)SENSOR_REG_ADDR);
+    #endif
+    """
 ```
 
-Generated C code:
+### Generated C Code
+
 ```c
-uint16_t sum(uint8_t a, uint8_t b) {
-    return a + b;
-}
+volatile uint16_t sensor_value = 0;  // volatile keyword added automatically
+```
+
+### When to Use @volatile
+
+- **Hardware registers**: Memory-mapped I/O that hardware can modify
+- **Interrupt handlers**: Variables shared between ISRs and main code
+- **DMA buffers**: Memory modified by DMA controllers
+- **Multi-threaded access**: Variables accessed by multiple threads (RTOS)
+
+The `# @volatile` comment prevents compiler optimizations that assume the variable's value only changes through explicit assignments in your code.
+
+
+## Cross-Platform Development
+
+py2mcu unifies MCU and PC code through target macros:
+
+### Target Macros
+
+| Macro | Description |
+|---------------|-------------|
+| `TARGET_PC` | Compiling for PC |
+| `TARGETS_HARDWARE` | Compiling for any MCU (STM32, ESP32, etc.) |
+| `TARGET_STM32` | Specific to STM32 chips |
+| `TARGET_ESP32` | Specific to ESP32 chips |
+| `TARGET_RP2040` | Specific to Raspberry Pi Pico |
+
+### Example: Platform-Specific Code
+
+```python
+def get_adc_value() -> uint8_t:
+    result: uint8_t = 0
+    
+    __C_CODE__ = """
+    #ifdef TARGET_PC
+        // Simulate ADC: return random value
+        result = rand() % 256;
+    #elif defined(TARGET_STM32)
+        // Real HAL call for STM32
+        result = HAL_ADC_GetValue(&hadc1) & 0xFF;
+    #else
+        #error "Unsupported target"
+    #endif
+    """
+    
+    return result
+```
+
+## Inline C Code
+
+Write performance-critical or hardware-specific code directly in C using `__C_CODE__` string literals:
+
+```python
+def blink_led() -> None:
+    delay_time: uint32_t = 500
+    
+    __C_CODE__ = """
+    #ifdef TARGET_STM32
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    #elif defined(TARGET_ESP32)
+        gpio_set_level(LED_PIN, 1);
+    #else
+        printf("LED ON (PC simulation)\n");
+    #endif
+    
+    #ifdef TARGET_PC
+        usleep(delay_time * 1000);
+    #else
+        HAL_Delay(delay_time);
+    #endif
+    """
 ```
 
 ## Examples
 
-See [examples/](https://github.com/wenchung/py2mcu/tree/main/examples):
+See `examples/` for more:
 
-- [demo1_led_blink.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo1_led_blink.py) - Basic LED blinking with target-specific code
-- [demo2_adc_average.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo2_adc_average.py) - ADC reading and averaging
-- [demo3_inline_c.py](https://github.com/wenchung/py2mcu/blob/main/examples/demo3_inline_c.py) - Inline C code integration
-
-## Contributing
-
-We welcome contributions! Please open an issue or submit a pull request.
-
-## Contact
-
-For commercial licensing or support: cwthome@gmail.com
+- `demo1_led_blink.py` - Basic GPIO control
+```
