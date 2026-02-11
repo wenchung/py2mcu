@@ -177,6 +177,45 @@ py2mcu unifies MCU and PC code through target macros:
 | `TARGET_ESP32` | Specific to ESP32 chips |
 | `TARGET_RP2040` | Specific to Raspberry Pi Pico |
 
+### How to Define Target Macros
+
+Target macros should be defined in your build system or at the top of your generated C file:
+
+**Method 1: Compiler flags (recommended)**
+```bash
+# For PC simulation
+gcc -DTARGET_PC main.c -o main
+
+# For STM32
+arm-none-eabi-gcc -DTARGET_STM32 -DTARGETS_HARDWARE main.c -o main.elf
+
+# For ESP32
+xtensa-esp32-elf-gcc -DTARGET_ESP32 -DTARGETS_HARDWARE main.c -o main.elf
+```
+
+**Method 2: In your C code**
+```c
+// Add at the top of your main.c or config.h
+#define TARGET_PC        // For PC simulation
+// OR
+#define TARGET_STM32     // For STM32 hardware
+#define TARGETS_HARDWARE // Generic hardware flag
+```
+
+**Method 3: Using py2mcu programmatically**
+```python
+from py2mcu import compile_to_c
+
+# Compile with target macro
+c_code = compile_to_c('input.py', target='stm32')
+# This will add #define TARGET_STM32 to the output
+```
+
+**Best Practice:**
+- Define `TARGETS_HARDWARE` for any physical MCU
+- Define specific target (e.g., `TARGET_STM32`) for chip-specific code
+- Use `TARGET_PC` only for simulation/testing on desktop
+
 ### Example: Platform-Specific Code
 
 ```python
