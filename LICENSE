@@ -1,50 +1,76 @@
-IyBweTJtY3UgRHVhbCBMaWNlbnNlCgojIyBMaWNlbnNlIE9wdGlvbnMKCnB5
-Mm1jdSBpcyBhdmFpbGFibGUgdW5kZXIgdHdvIGxpY2Vuc2Ugb3B0aW9uczoK
-CiMjIyAxLiBBR1BMdjMgTGljZW5zZSAoRnJlZSBmb3IgT3BlbiBTb3VyY2Up
-CgpGb3Igb3BlbiBzb3VyY2UgcHJvamVjdHMsIHBlcnNvbmFsIHVzZSwgYW5k
-IGVkdWNhdGlvbmFsIHB1cnBvc2VzLCBweTJtY3UgaXMgbGljZW5zZWQgdW5k
-ZXIgdGhlICoqR05VIEFmZmVybyBHZW5lcmFsIFB1YmxpYyBMaWNlbnNlIHYz
-LjAgKEFHUEx2MykqKi4KCioqS2V5IFBvaW50czoqKgotIOKchSBGcmVlIHRv
-IHVzZSwgbW9kaWZ5LCBhbmQgZGlzdHJpYnV0ZQotIOKchSBQZXJmZWN0IGZv
-ciBvcGVuIHNvdXJjZSBwcm9qZWN0cwotIOKchSBNdXN0IGRpc2Nsb3NlIHNv
-dXJjZSBjb2RlIG9mIGRlcml2YXRpdmUgd29ya3MKLSDinIUgRGVyaXZhdGl2
-ZSB3b3JrcyBtdXN0IGJlIGxpY2Vuc2VkIHVuZGVyIEFHUEx2MwoKRnVsbCBs
-aWNlbnNlIHRleHQ6IGh0dHBzOi8vd3d3LmdudS5vcmcvbGljZW5zZXMvYWdw
-bC0zLjAuZW4uaHRtbAoKKipUaGlzIG9wdGlvbiBpcyBpZGVhbCBmb3I6KioK
-LSBQZXJzb25hbCBwcm9qZWN0cwotIEFjYWRlbWljIHJlc2VhcmNoCi0gT3Bl
-biBzb3VyY2Ugc29mdHdhcmUKLSBOb24tY29tbWVyY2lhbCBhcHBsaWNhdGlv
-bnMKCi0tLQoKIyMjIDIuIENvbW1lcmNpYWwgTGljZW5zZSAoRm9yIFByb3By
-aWV0YXJ5IFVzZSkKCkZvciBjb21tZXJjaWFsLCBwcm9wcmlldGFyeSwgb3Ig
-Y2xvc2VkLXNvdXJjZSBhcHBsaWNhdGlvbnMsIHlvdSBuZWVkIGEgKipDb21t
-ZXJjaWFsIExpY2Vuc2UqKi4KCioqQmVuZWZpdHM6KioKLSDinIUgTm8gb2Js
-aWdhdGlvbiB0byBvcGVuIHNvdXJjZSB5b3VyIGNvZGUKLSDinIUgVXNlIHB5
-Mm1jdSBpbiBwcm9wcmlldGFyeSBwcm9kdWN0cwotIOKchSBQcmlvcml0eSBz
-dXBwb3J0Ci0g4pyFIEN1c3RvbSBkZXZlbG9wbWVudCBhc3Npc3RhbmNlIChv
-cHRpb25hbCkKCioqUHJpY2luZzoqKgotIEluZGl2aWR1YWwgRGV2ZWxvcGVy
-OiAkMTk5L3llYXIKLSBTbWFsbCBUZWFtICh1cCB0byA1IGRldmVsb3BlcnMp
-OiAkOTk5L3llYXIKLSBFbnRlcnByaXNlOiAkNCw5OTkveWVhciAodW5saW1p
-dGVkIGRldmVsb3BlcnMpCgoqKlRvIHB1cmNoYXNlIGEgY29tbWVyY2lhbCBs
-aWNlbnNlOioqCi0gRW1haWw6IHlvdXItZW1haWxAZXhhbXBsZS5jb20KLSBX
-ZWJzaXRlOiBodHRwczovL3lvdXItd2Vic2l0ZS5jb20vY29tbWVyY2lhbC1s
-aWNlbnNlCgotLS0KCiMjIEhvdyB0byBDaG9vc2UKCnwgVXNlIENhc2UgfCBM
-aWNlbnNlIFR5cGUgfAp8LS0tLS0tLS0tLXwtLS0tLS0tLS0tLS0tLXwKfCBP
-cGVuIHNvdXJjZSBwcm9qZWN0IChjb2RlIHB1YmxpY2x5IGF2YWlsYWJsZSkg
-fCBBR1BMdjMgKEZyZWUpIHwKfCBQZXJzb25hbC9lZHVjYXRpb25hbCB1c2Ug
-KG5vdCBkaXN0cmlidXRpbmcpIHwgQUdQTHYzIChGcmVlKSB8CnwgQ29tbWVy
-Y2lhbCBwcm9kdWN0IChrZWVwaW5nIGNvZGUgcHJpdmF0ZSkgfCBDb21tZXJj
-aWFsIExpY2Vuc2UgfAp8IFNhYVMvV2ViIHNlcnZpY2UgKG5vdCBzaGFyaW5n
-IHNvdXJjZSBjb2RlKSB8IENvbW1lcmNpYWwgTGljZW5zZSB8CgotLS0KCiMj
-IEZBUQoKKipROiBDYW4gSSB0cnkgcHkybWN1IGJlZm9yZSBwdXJjaGFzaW5n
-IGEgY29tbWVyY2lhbCBsaWNlbnNlPyoqCkE6IFllcyEgVXNlIGl0IHVuZGVy
-IEFHUEx2MyBmb3IgZXZhbHVhdGlvbi4gT25jZSB5b3UncmUgcmVhZHkgdG8g
-dXNlIGl0IGluIGEgY29tbWVyY2lhbCBwcm9kdWN0LCBwdXJjaGFzZSBhIGNv
-bW1lcmNpYWwgbGljZW5zZS4KCioqUTogV2hhdCBoYXBwZW5zIGlmIEkgZG9u
-J3QgY29tcGx5IHdpdGggQUdQTHYzPyoqCkE6IFlvdSB3b3VsZCBiZSBpbiB2
-aW9sYXRpb24gb2YgY29weXJpZ2h0IGxhdy4gVGhlIG9ubHkgd2F5IHRvIHVz
-ZSBweTJtY3UgaW4gYSBjbG9zZWQtc291cmNlIHByb2R1Y3QgaXMgd2l0aCBh
-IGNvbW1lcmNpYWwgbGljZW5zZS4KCioqUTogQ2FuIEkgY29udHJpYnV0ZSB0
-byBweTJtY3U/KioKQTogQWJzb2x1dGVseSEgV2Ugd2VsY29tZSBjb250cmli
-dXRpb25zIHVuZGVyIHRoZSBDb250cmlidXRvciBMaWNlbnNlIEFncmVlbWVu
-dCAoQ0xBKS4KCi0tLQoKIyMgQ29weXJpZ2h0CgpDb3B5cmlnaHQgKGMpIDIw
-MjYgQ2hpdSBXZW4gQ2h1bmcKCkFsbCByaWdodHMgcmVzZXJ2ZWQuIFRoaXMg
-c29mdHdhcmUgaXMgZHVhbC1saWNlbnNlZCBhcyBkZXNjcmliZWQgYWJvdmUu
+# py2mcu Dual License
+
+## License Options
+
+py2mcu is available under two license options:
+
+### 1. AGPLv3 License (Free for Open Source)
+
+For open source projects, personal use, and educational purposes, py2mcu is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
+
+**Key Points:**
+- ✅ Free to use, modify, and distribute
+- ✅ Perfect for open source projects
+- ✅ Must disclose source code of derivative works
+- ✅ Derivative works must be licensed under AGPLv3
+
+Full license text: https://www.gnu.org/licenses/agpl-3.0.en.html
+
+**This option is ideal for:**
+- Personal projects
+- Academic research
+- Open source software
+- Non-commercial applications
+
+---
+
+### 2. Commercial License (For Proprietary Use)
+
+For commercial, proprietary, or closed-source applications, you need a **Commercial License**.
+
+**Benefits:**
+- ✅ No obligation to open source your code
+- ✅ Use py2mcu in proprietary products
+- ✅ Priority support
+- ✅ Custom development assistance (optional)
+
+**Pricing:**
+- Individual Developer: $199/year
+- Small Team (up to 5 developers): $999/year
+- Enterprise: $4,999/year (unlimited developers)
+
+**To purchase a commercial license:**
+- Email: your-email@example.com
+- Website: https://your-website.com/commercial-license
+
+---
+
+## How to Choose
+
+| Use Case | License Type |
+|----------|--------------|
+| Open source project (code publicly available) | AGPLv3 (Free) |
+| Personal/educational use (not distributing) | AGPLv3 (Free) |
+| Commercial product (keeping code private) | Commercial License |
+| SaaS/Web service (not sharing source code) | Commercial License |
+
+---
+
+## FAQ
+
+**Q: Can I try py2mcu before purchasing a commercial license?**
+A: Yes! Use it under AGPLv3 for evaluation. Once you're ready to use it in a commercial product, purchase a commercial license.
+
+**Q: What happens if I don't comply with AGPLv3?**
+A: You would be in violation of copyright law. The only way to use py2mcu in a closed-source product is with a commercial license.
+
+**Q: Can I contribute to py2mcu?**
+A: Absolutely! We welcome contributions under the Contributor License Agreement (CLA).
+
+---
+
+## Copyright
+
+Copyright (c) 2026 Chiu Wen Chung
+
+All rights reserved. This software is dual-licensed as described above.
