@@ -3,6 +3,7 @@ C code generator from Python AST
 """
 import ast
 from typing import List, Dict, Any
+from .parser import extract_variable_modifiers
 
 class CCodeGenerator(ast.NodeVisitor):
     """
@@ -23,6 +24,10 @@ class CCodeGenerator(ast.NodeVisitor):
 
     def generate(self, tree: ast.Module) -> str:
         """Generate C code from AST"""
+        # Store source code for modifier extraction
+        if hasattr(tree, '_source'):
+            self._source_code = tree._source
+        
         self.code = []
 
         # Add includes
@@ -241,6 +246,41 @@ class CCodeGenerator(ast.NodeVisitor):
         self.indent_level -= 1
         self.emit("}")
 
+    
+    def _get_storage_class_specifiers(self, modifiers: dict, base_type: str) -> str:
+        """Generate C storage class specifiers from modifiers.
+
+        Args:
+            modifiers: Dict with 'const', 'public', 'volatile' flags
+            base_type: The base C type (e.g., 'int', 'uint8_t')
+
+        Returns:
+            Complete type declaration with modifiers in correct C order
+
+        Examples:
+            {'const': True, 'public': False, 'volatile': False}, 'int' -> 'static const int'
+            {'const': True, 'public': True, 'volatile': False}, 'int' -> 'const int'
+            {'const': False, 'public': False, 'volatile': True}, 'int' -> 'static volatile int'
+        """
+        parts = []
+
+        # Static (default unless public)
+        if not modifiers.get('public', False):
+            parts.append('static')
+
+        # Volatile
+        if modifiers.get('volatile', False):
+            parts.append('volatile')
+
+        # Const
+        if modifiers.get('const', False):
+            parts.append('const')
+
+        # Base type
+        parts.append(base_type)
+
+        return ' '.join(parts)
+
     def visit_AnnAssign(self, node: ast.AnnAssign):
         """Generate annotated assignment"""
         if isinstance(node.target, ast.Name):
@@ -254,11 +294,33 @@ class CCodeGenerator(ast.NodeVisitor):
                     self.emit(f"{var_type} {var_name} = {value};")
                     self.local_vars.add(var_name)
                 else:
-                    # Module-level: const declaration
-                    self.emit(f"const {var_type} {var_name} = {value};")
-            else:
-                self.emit(f"{var_type} {var_name};")
+                    # Global variable: check for modifiers
+                    # Extract modifiers from comment above declaration
+                    modifiers = {'const': False, 'public': False, 'volatile': False}
 
+                    # Get source code if available (for modifier extraction)
+                    if hasattr(self, '_source_code'):
+                        modifiers = extract_variable_modifiers(self._source_code, node.lineno)
+
+                    # Generate type with storage class specifiers
+                    full_type = self._get_storage_class_specifiers(modifiers, var_type)
+
+                    self.emit(f"{full_type} {var_name} = {value};")
+            else:
+                # Declaration without value
+                if self.in_function:
+                    self.emit(f"{var_type} {var_name};")
+                    self.local_vars.add(var_name)
+                else:
+                    # Global declaration
+                    modifiers = {'const': False, 'public': False, 'volatile': False}
+                    if hasattr(self, '_source_code'):
+                        modifiers = extract_variable_modifiers(self._source_code, node.lineno)
+
+                    full_type = self._get_storage_class_specifiers(modifiers, var_type)
+                    self.emit(f"{full_type} {var_name};")
+
+    
     def visit_Assign(self, node: ast.Assign):
         """Generate assignment"""
         value = self._expr_to_c(node.value)
