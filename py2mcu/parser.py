@@ -62,3 +62,59 @@ def extract_define_constants(source: str) -> List[Dict]:
             })
     
     return defines
+
+def extract_variable_modifiers(source: str, lineno: int) -> Dict[str, bool]:
+    """Extract variable modifiers from comment above variable declaration.
+    
+    Supports modifiers: @const, @public, @volatile
+    Can appear in any order, with or without @ prefix in combinations.
+    
+    Examples:
+        # @const
+        x: int = 10
+        
+        # @public @volatile
+        y: int = 20
+        
+        # @volatile const public
+        z: int = 30
+    
+    Args:
+        source: Full source code
+        lineno: Line number of the variable declaration (1-indexed)
+    
+    Returns:
+        Dict with 'const', 'public', 'volatile' boolean flags
+    """
+    modifiers = {'const': False, 'public': False, 'volatile': False}
+    
+    lines = source.split('\n')
+    if lineno < 1 or lineno > len(lines):
+        return modifiers
+    
+    # Check the line before the declaration
+    comment_lineno = lineno - 2  # Convert to 0-indexed and look at previous line
+    if comment_lineno < 0:
+        return modifiers
+    
+    comment_line = lines[comment_lineno].strip()
+    
+    # Must be a comment line
+    if not comment_line.startswith('#'):
+        return modifiers
+    
+    # Remove leading # and strip
+    comment_text = comment_line.lstrip('#').strip()
+    
+    # Pattern: Match @modifier or bare modifier words
+    # Supports: "@const @public", "const public", "@volatile const", etc.
+    pattern = r'@?(?:const|public|volatile)'
+    matches = re.findall(pattern, comment_text, re.IGNORECASE)
+    
+    # Set flags based on found modifiers
+    for match in matches:
+        modifier = match.lstrip('@').lower()
+        if modifier in modifiers:
+            modifiers[modifier] = True
+    
+    return modifiers
