@@ -119,18 +119,60 @@ def adc_example() -> None:
 | `int8_t` | `int8_t` | -128 ~ 127 |
 | `int16_t` | `int16_t` | -32768 ~ 32767 |
 | `int32_t` | `int32_t` | -2147483648 ~ 2147483647 |
-| `bool` | `bool` | TRUEL/FALSE |
-| `float` | `float` | - |
-| `double` | `double` | - |
-| `None` | `void` | return type only |
+
+### Type Inference
+
+If you don't specify a type, py2mcu will infer it from the initial value (default to `int`):
+
+```python
+def type_example() -> None:
+    # Inferred as 'int'
+    
+    count = 10          # integer
+    value = 0x4200      # hexadecimal integer
+    mask = 0x7F         # bit mask (int)
+```
+
+## Volatile Variables
+
+For hardware registers or variables modified by interrupts/DMA, use the `# @volatile` comment to mark variables as `volatile` in generated C code:
+
+### Example: Hardware Register Access
+
+```python
+def read_sensor() -> None:
+    sensor_value: uint16_t = 0  # @volatile
+    
+    __C_CODE__ = """
+    #ifdef TARGET_PC
+        sensor_value = rand() % 1024;
+    #else
+        sensor_value = *((volatile uint16_t*)SENSOR_REG_ADDR);
+    #endif
+    """
+```
+
+### Generated C Code
+
+```c
+volatile uint16_t sensor_value = 0;  // volatile keyword added automatically
+```
+
+### When to Use @volatile
+
+- **Hardware registers**: Memory-mapped I/O that hardware can modify
+- **Interrupt handlers**: Variables shared between ISRs and main code
+- **DMA buffers**: Memory modified by DMA controllers
+- **Multi-threaded access**: Variables accessed by multiple threads (RTOS)
+
+The `# @volatile` comment prevents compiler optimizations that assume the variable's value only changes through explicit assignments in your code.
 
 ## Cross-Platform Development
 
-py2mcu uses target macros to enable unified development across PC and various MCUs.
+py2mcu provides Platform-specific macros to control code generation for different targets. You can define these macros in three ways:
 
-### How to Define Target Macros?
+### Method 1: Compiler flags
 
-**Method 1: Compiler flags (recommended)**
 ```bash
 # For PC simulation (matches --target pc)
 gcc -DTARGET_PC main.c -o main
@@ -142,16 +184,18 @@ arm-none-eabi-gcc -DTARGET_STM32 -DTARGETS_HARDWARE main.c -o main.elf
 xtensa-esp32-elf-gcc -DTARGET_ESP32 -DTARGETS_HARDWARE main.c -o main.elf
 ```
 
-**Method 2: Define in code**
-```c
-#define TARGET_PC 1
-// or
-#define TARGET_STM32 1
-// or
-#define TARGET_ESP32 1
+### Method 2: Project Configuration
+
+For CMake or Makefile projects, define target macros in your build files:
+
+```cmake
+# CmakeLists.txt
+add_definitions(-DTARGET_STM32)
+add_definitions(-DTARGETS_HARDWARE)
 ```
 
-**Method 3: Using py2mcu CLI**
+### Method 3: Using py2mcu CLI
+
 ```bash
 # Command line uses lowercase (easier to type)
 py2mcu compile --target pc input.py
@@ -164,43 +208,53 @@ py2mcu compile --target esp32 input.py
 # --target esp32  → #define TARGET_ESP32 1
 ```
 
-### Target Macros
+### Available Macros
 
-| Macro | Description | Use Case |
-|-----|-----------|---------|
-| `TARGETS_HARDWARE` | Defined when targeting any hardware (no PC) | Skip PC-specific code |
-| `TARGETS_EMBEDDED` | Alias for `TARGETS_HARDWARE` | Alternative naming |
-| `TARGETS_FMUCX_ENABLE` | Enable simulated FMUC for targets without FMUC (PC, RP2040) | Software FPU emulation |
-| `TARGETS_PSEUDO_FINFO ` | Enable finfo-simulation where hardware FPU is available but `finfo` isn't | FPU info shim |
+#### Platform Macros
+
+| Macro | Description | CLI Flag |
+|-------|-------------|----------|
+| `TARGET_PC` = 1 | PC simulation | `--target pc` |
+| `TARGET_STM32` = 1 | STM32 microcontrollers | `--target stm32` |
+| `TARGET_ESP32` = 1 | ESP32 microcontrollers | `--target esp32` |
+| `TARGET_RP2040` = 1 | Raspberry Pi Pico | `--target rp2040` |
+| `TARGETS_HARDWARE` = 1 | Any hardware target (not PC) | auto-set for MCU targets |
 
 ### Platform-Specific Macros
 
-**Example: PC Target**
+**PC Target:**
 ```bash
 py2mcu compile --target pc input.py
 ```
-
-Generated C code defines:
+Generates:
 ```c
 #define TARGET_PC 1
 ```
 
-**Example: STM32 Target**
+**STM32 Target:**
 ```bash
 py2mcu compile --target stm32 input.py
 ```
-
-Generated C code defines:
+Generates:
 ```c
 #define TARGET_STM32 1
 #define TARGETS_HARDWARE 1
 ```
 
+**ESP32 Target:**
+```bash
+py2mcu compile --target esp32 input.py
+```
+Generates:
+```c
+#define TARGET_ESP32 1
+#define TARGETS_HARDWARE 1
+```
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues and pull requests.
+Contributions welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-AGPLv3 - see [LICENSE](LICENSE) for details
-Commercial License - contact fwthome@gmail.com
+See [LICENSE_DUAL.md](LICENSE_DUAL.md) for details.
